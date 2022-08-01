@@ -1,0 +1,91 @@
+{% extends 'landing/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+   <div class="container">
+       <div class="row mt-5">
+           <div class="col-md-5 col-sm-6">
+               <a href="{% url 'post-list' %}" class="btn btn-light"> Back to Feed</a>
+           </div>
+       </div>
+       <div class="row justify-content-center mt-3">
+            <div class="col-md-5 col-sm-12 border-bottom">
+                
+                    <div>
+                    <a href="{% url 'profile' post.author.profile.pk %}">
+                    <img class = "rounded-circle post-img" src="{{post.author.profile.picture.url}}" alt="Image">
+                    </a>
+                    <p class="post-text">
+                        <a class="text-primary link-color" href="{% url 'profile' post.author.profile.pk %}">
+                        @{{post.author}}</a>  {{post.created_on}}
+                    
+                </div>
+                     {{post.created_on}}
+                    {% if request.user == post.author %}
+                    <a href="{% url 'post-edit' post.id %}" class="grey-color"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a href="{% url 'post-delete' post.id %}" class="grey-color"><i class="fa-solid fa-trash-can"></i></a>
+                    {% endif %}
+                </p>
+                <p>{{post.body}}</p>
+
+                <div class="d-flex flex-row">
+                    <form action="{% url 'like' post.pk %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="fa-solid fa-thumbs-up"> <span>{{post.likes.all.count}}</span>  </i>
+                        </button>
+                    </form>
+    
+                    <form action="{% url 'dislike' post.pk %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="remove-default-btn" type="submit">
+                            <i class="fa-solid fa-thumbs-down"> <span>{{post.dislikes.all.count}}</span> </i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+
+       <div class="row justify-content-center mt-3">
+           <div class="col-md-5 col-sm-12   ">
+                   <form action="" method="POST">
+                       {% csrf_token %}
+                       {{form | crispy}}
+                       <div class="d-grid gap-2">
+                           <button class='btn btn-dark mt-4 mb-4'>Submit</button>
+                       </div>
+                   </form>
+           </div>
+       </div>
+
+       {% for comment in comments %}
+        <div class="row justify-content-center mt-3 ml-10 ">
+            <div class="col-md-5 col-sm-12 border-bottom">
+                <p>
+                    <div>
+                        <a href="{% url 'profile' comment.author.profile.pk %}">
+                        <img class = "rounded-circle post-img" src="{{comment.author.profile.picture.url}}" alt="Image">
+                        </a>
+                        <p class="post-text">
+                            <a class="text-primary link-color" href="{% url 'profile' comment.author.profile.pk %}">
+                            @{{comment.author}}</a>  {{comment.created_on}}
+                            {% if request.user == comment.author %}
+                            <a href="{% url 'comment-delete' post.id comment.id %}" class="grey-color"><i class="fa-solid fa-trash-can"></i></a>
+                            {% endif %}
+                        </p>
+                        
+                    </div>
+                    
+                     
+                </p>
+                    <p>{{comment.comment}}</p>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+{% endblock content %}
+
