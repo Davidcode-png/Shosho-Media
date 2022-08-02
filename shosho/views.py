@@ -53,6 +53,20 @@ class PostDetailView(LoginRequiredMixin, RedirectView,View):
         #return render(request,'shosho/post_detail.html',context)
         return redirect('post-detail',pk=post.id)
 
+class CommentReplyView(LoginRequiredMixin,View):
+    def post(self,request,post_pk,pk,*args, **kwargs):
+        post = Post.objects.get(pk=post_pk)
+        parent_comment = Comment.objects.get(pk=pk)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            new_commment = form.save(commit=False)
+            new_commment.author = request.user
+            new_commment.post = post
+            new_commment.parent = parent_comment
+            new_commment.save()
+        
+        return redirect('post-detail',pk=post_pk)
+
 
 class PostEditView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model = Post
@@ -199,3 +213,69 @@ class UserSearch(View):
         context = {'profile_list':profile_list}
     
         return render(request,'shosho/search.html',context)
+
+class ListFollowers(View):
+    def get(self,request,pk,*args, **kwargs):
+        profile = Profile.objects.get(pk=pk)
+        followers = profile.followers.all()
+        context = {'profile':profile,'followers':followers}
+        return render(request,'shosho/follower_list.html',context)
+
+
+class AddCommentLike(LoginRequiredMixin,View):
+    def post(self,request,pk,*args, **kwargs):
+        comment = Comment.objects.get(pk=pk)
+
+        is_dislike = False
+
+        for dislike in comment.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+        
+        if is_dislike:
+            comment.dislikes.remove(request.user)
+
+        is_like = False
+
+        for like in comment.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if not is_like:
+            comment.likes.add(request.user)
+
+        if is_like:
+            comment.likes.remove(request.user)
+        next = request.POST.get('next','/')
+        return HttpResponseRedirect(next)
+
+class DislikeComment(LoginRequiredMixin,View):
+    def post(self,request,pk,*args, **kwargs):
+        comment = Comment.objects.get(pk=pk)
+
+        is_like = False
+
+        for like in comment.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+        
+        if is_like:
+            comment.likes.remove(request.user)
+
+        is_dislike = False
+
+        for dislike in comment.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if not is_dislike:
+            comment.dislikes.add(request.user)
+
+        if is_dislike:
+            comment.dislikes.remove(request.user)
+        next = request.POST.get('next','/')
+        return HttpResponseRedirect(next)
