@@ -26,7 +26,12 @@
                     <a href="{% url 'post-delete' post.id %}" class="grey-color"><i class="fa-solid fa-trash-can"></i></a>
                     {% endif %}
                 </p>
+                    {% if post.image %}
+                        <img src=" {{ post.image.url }} " class="post-image">
+                    {% endif %}
                 <p>{{post.body}}</p>
+
+                
 
                 <div class="d-flex flex-row">
                     <form action="{% url 'like' post.pk %}" method="POST">
@@ -50,8 +55,8 @@
     
 
        <div class="row justify-content-center mt-3">
-           <div class="col-md-5 col-sm-12   ">
-                   <form action="" method="POST">
+           <div class="col-md-5 col-sm-12 ">
+                   <form action="" method="POST" enctype="multipart/form-data">
                        {% csrf_token %}
                        {{form | crispy}}
                        <div class="d-grid gap-2">
@@ -83,7 +88,9 @@
                      
                 </p>
                     <p>{{comment.comment}}</p>
-
+                    {% if comment.image %}
+                        <img src=" {{ comment.image.url }} " class="post-image">
+                    {% endif %}
                     <div class="d-flex flex-row">
                         <form action="{% url 'like-comment' post.pk comment.pk %}" method="POST">
                             {% csrf_token %}

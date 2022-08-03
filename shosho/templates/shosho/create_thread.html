@@ -1,0 +1,39 @@
+{% extends 'landing/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-12 p-5">
+            <a href="{% url 'inbox' %}" class='btn btn-light'> Back to your Inbox </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 p-5">
+            <h3>Start a Convo</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content mt-3 mb-5">
+        <div class="col-md-5 col-sm-12">
+            <form action="" method="POST">
+                {% csrf_token %}
+                <p>Enter the Person you would love to talk to</p>
+                {{ form | crispy }}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-dark mt-3" type="submit">
+                        Continue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}
+
+

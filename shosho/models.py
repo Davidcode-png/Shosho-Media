@@ -1,3 +1,4 @@
+from distutils.command.upload import upload
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -10,6 +11,7 @@ class Post(models.Model):
     created_on = models.DateTimeField(default=timezone.now)
     likes = models.ManyToManyField(User,blank=True,related_name='likes')
     dislikes = models.ManyToManyField(User,blank=True,related_name='dislikes')
+    image = models.ImageField(upload_to='uploads/post_pic',blank=True,null=True)
 
     def __str__(self) -> str:
         return f'{self.body[:20]}... {self.id}'
@@ -21,6 +23,7 @@ class Comment(models.Model):
     post = models.ForeignKey('Post',on_delete=models.CASCADE)
     likes = models.ManyToManyField(User,blank=True,related_name='comment_likes')
     dislikes = models.ManyToManyField(User,blank=True,related_name='comment_dislikes')
+    image = models.ImageField(upload_to='uploads/comment_pic',blank=True,null=True)
     parent = models.ForeignKey('self',on_delete=models.CASCADE,blank=True,null=True,related_name='+')
 
     @property
@@ -69,3 +72,15 @@ class Notification(models.Model):
     date = models.DateTimeField(default=timezone.now)
     user_has_seen = models.BooleanField(default=False)
 
+class ThreadModel(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='+')
+    receiver = models.ForeignKey(User,on_delete=models.CASCADE,related_name='+')
+
+class Message(models.Model):
+    thread = models.ForeignKey('ThreadModel',on_delete=models.CASCADE,related_name='+',blank=True,null=True)
+    sender_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='+')
+    receiver_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='+')
+    body = models.CharField(max_length=1000)
+    image = models.ImageField(upload_to='uploads/message_pic',blank=True,null=True)
+    date = models.DateTimeField(default=timezone.now)
+    is_read = models.BooleanField(default=False)
