@@ -13,10 +13,13 @@
     {% endif %}
     ><i class="fa-solid fa-circle-nodes"></i>ShoSho Media</a>
     <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <ul class="navbar-nav me-auto mt-3 mb-2 mb-lg-0">
+        <li>
+          <h5> <a class="inbox-icon" href="{% url 'explore' %}">Explore <i class="fa-brands fa-wpexplorer"></i></a></h5>
+        </li>
       </ul>
       <form class="d-flex" action="{% url 'profile-search' %}" method="GET">
-        <div class="input-group">
+        <div class="input-group my-2">
         <span class="input-group-text" id="basic-addon1">@</span>
         <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1" name="query" value="{{request.GET.query}}">
         <button class="remove-default-btn" type="submit"> <i class="fa-solid fa-magnifying-glass"></i> </button>

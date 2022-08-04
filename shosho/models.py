@@ -12,9 +12,40 @@ class Post(models.Model):
     likes = models.ManyToManyField(User,blank=True,related_name='likes')
     dislikes = models.ManyToManyField(User,blank=True,related_name='dislikes')
     image = models.ManyToManyField('Image',blank=True)
+    shared_body = models.TextField(blank=True,null=True)
+    shared_on = models.DateTimeField(blank=True,null=True)
+    shared_user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True,related_name='+')
+    tags = models.ManyToManyField('Tag',blank=True)
+
+    class Meta:
+        ordering = ['-created_on','-shared_on']
 
     def __str__(self) -> str:
         return f'{self.body[:20]}... {self.id}'
+
+    def create_tags(self):
+        for word in self.body.split():
+            if word[0] == '#':
+                tag = Tag.objects.filter(name=word[1:]).first()
+                if tag:
+                    self.tags.add(tag.pk)
+                else:
+                    tag = Tag(name=word[1:])
+                    tag.save()
+                    self.tags.add(tag.pk)
+                self.save()
+        if self.shared_body:
+            for word in self.shared_body.split():
+                if word[0] == '#':
+                    tag = Tag.objects.filter(name=word[1:]).first()
+                    if tag:
+                        self.tags.add(tag.pk)
+                    else:
+                        tag = Tag(name=word[1:])
+                        tag.save()
+                        self.tags.add(tag.pk)
+                    self.save()
+
 
 class Comment(models.Model):
     comment = models.TextField()
@@ -25,6 +56,18 @@ class Comment(models.Model):
     dislikes = models.ManyToManyField(User,blank=True,related_name='comment_dislikes')
     image = models.ImageField(upload_to='uploads/comment_pic',blank=True,null=True)
     parent = models.ForeignKey('self',on_delete=models.CASCADE,blank=True,null=True,related_name='+')
+
+    def create_tags(self):
+        for word in self.comment.split():
+                if word[0] == '#':
+                    tag = Tag.objects.filter(name=word[1:]).first()
+                    if tag:
+                        self.tags.add(tag.pk)
+                    else:
+                        tag = Tag(name=word[1:])
+                        tag.save()
+                        self.tags.add(tag.pk)
+                    self.save()
 
     @property
     def children(self):
@@ -88,3 +131,7 @@ class Message(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to='uploads/post_pic',blank=True,null=True)
+
+class Tag(models.Model):
+    name = models.CharField(max_length=300)
+    

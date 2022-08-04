@@ -3,37 +3,43 @@ from django.dispatch import receiver
 from django.shortcuts import redirect, render
 from django.views import View
 from django.db.models import Q
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect,HttpResponse
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.views.generic import UpdateView,DeleteView,RedirectView
-from .models import Message, Notification, Post,Comment,Profile, ThreadModel,Image
-from .forms import MessageForm, PostForm,CommentForm, ThreadForm
+from .models import Message, Notification, Post,Comment,Profile, Tag, ThreadModel,Image
+from .forms import ExploreForm, MessageForm, PostForm,CommentForm, ThreadForm,ShareForm
+
 
 class PostListView(LoginRequiredMixin,View):
     def get(self,request,*args, **kwargs):
         loggedin_user = request.user
         posts = Post.objects.filter(
             author__profile__followers__in = [loggedin_user.id]
-        ).order_by('-created_on')
+        )
         #`comments = Comment.objects.filter(post=posts).order_by('-created_on')
         form = PostForm()
-        context = {'post_list':posts,'form':form}
+        share_form = ShareForm()
+        context = {'post_list':posts,'form':form,'share_form':share_form}
         return render(request,'shosho/post_list.html',context)
     
     def post(self,request,*args, **kwargs):
         loggedin_user = request.user
         posts = Post.objects.filter(
             author__profile__followers__in = [loggedin_user.id]
-        ).order_by('-created_on')
+        )
         form = PostForm(request.POST, request.FILES)
         images = request.FILES.getlist('image')
+        shared_form = ShareForm()
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.author = request.user
             new_post.save()
+
+            new_post.create_tags()
             for i in images:
                 img = Image(image=i)
                 img.save()
@@ -41,7 +47,7 @@ class PostListView(LoginRequiredMixin,View):
             
             new_post.save()
 
-        context = {'post_list':posts,'form':form}
+        context = {'post_list':posts,'form':form,'shared_form':shared_form}
         #return render(request,'shosho/post_list.html',context)
         #return super(PostListView, self).dispatch(request, *args, **kwargs)
         return redirect('post-list')
@@ -63,7 +69,8 @@ class PostDetailView(LoginRequiredMixin, RedirectView,View):
             new_comment.author = request.user
             new_comment.post = post
             new_comment.save()
-
+            new_comment.create_tags()
+            
         comments = Comment.objects.filter(post=post).order_by('-created_on')
         notification = Notification.objects.create(notification_type = 2,from_user= request.user,to_user = post.author,post=post)
         context = {'post':post,'form':form,'comments':comments}
@@ -406,3 +413,58 @@ class CreateMessage(View):
         # message.save() 
         notification  = Notification.objects.create(notification_type = 4,from_user = request.user,to_user=receiver,thread = thread)
         return redirect('thread',pk=pk)
+
+class SharedPostView(View):
+    def post(self,request,pk,*args, **kwargs):
+        original_post = Post.objects.get(pk=pk)
+        form = ShareForm(request.POST)
+        if form.is_valid():
+            new_post = Post(shared_body = self.request.POST.get('body'),body=original_post.body,
+                            author = original_post.author,
+                            created_on= original_post.created_on,shared_user=request.user,
+                            shared_on = timezone.now())
+            new_post.save()
+
+            for img in original_post.image.all():
+                new_post.image.add(img)
+            
+            new_post.save()
+        
+        return redirect('post-list')
+
+class Explore(View):
+    def get(self,request,*args, **kwargs):
+        query = self.request.GET.get('query')
+        tag = Tag.objects.filter(name=query).first()
+        explore_form = ExploreForm()
+
+        if tag:
+            posts = Post.objects.filter(tags__in = [tag])
+        else:
+            posts = Post.objects.all()
+        
+        context = {'posts':posts,'explore_form':explore_form}
+
+        return render(request,'shosho/explore.html',context)
+    
+    def post(self,request,*args, **kwargs):
+        explore_form = ExploreForm(request.POST)
+        if explore_form.is_valid():
+            query = explore_form.cleaned_data['query']
+        
+            tag = Tag.objects.filter(name=query).first()
+            posts = None
+
+            if tag:
+                posts = Post.objects.filter(tags__in=[tag])
+
+            if posts:
+                context ={
+                    'tag':tag,
+                    'posts':posts
+                }
+            else:
+                context = {'tag':tag}
+
+            return HttpResponseRedirect(f'/shosho/explore?query={query}')
+        return HttpResponseRedirect('/shosho/explore')

@@ -5,12 +5,14 @@ from .views import (Dislike, PostListView, PostDetailView,PostEditView,PostDelet
                     AddCommentLike,DislikeComment,CommentReplyView,
                     PostNotification,FollowNotification,RemoveNotification,
                     CreateThread,ListThreads,ThreadView,CreateMessage,
-                    ThreadNotification)
+                    ThreadNotification,SharedPostView,Explore)
 
 
 urlpatterns = [
     path('', PostListView.as_view(), name='post-list'),
+    path('explore/',Explore.as_view(),name='explore'),
     path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
+    path('post/<int:pk>/share', SharedPostView.as_view(), name='share-post'),
     path('post/edit/<int:pk>',PostEditView.as_view(),name='post-edit'),
     path('post/delete/<int:pk>',PostDeleteView.as_view(),name='post-delete'),
     path('post/<int:post_pk>/comment/<int:pk>/delete',CommentDeleteView.as_view(),name='comment-delete'),
@@ -33,5 +35,6 @@ urlpatterns = [
     path('inbox/create-thread',CreateThread.as_view(),name='create-thread'),
     path('inbox/<int:pk>',ThreadView.as_view(),name='thread'),
     path('inbox/<int:pk>/send',CreateMessage.as_view(),name='create-message'),
+
 
 ]

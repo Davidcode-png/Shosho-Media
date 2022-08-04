@@ -41,3 +41,18 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = ['body','image']
+
+class ShareForm(forms.Form):
+    body = forms.CharField(
+        label='',
+        widget=forms.Textarea(attrs={
+            'rows':'3',
+            'placeholder':'Post Something....',
+        })
+    )
+
+class ExploreForm(forms.Form):
+    query = forms.CharField(label='',
+    widget=forms.TextInput(attrs={
+        'placeholder':'Explore Tags'
+    }))

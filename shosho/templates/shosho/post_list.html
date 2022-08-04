@@ -21,11 +21,23 @@
             </div>
         </div>
 
-
-
+        {% if posts %}
         {% for post in post_list %}
         <div class="row justify-content-center mt-3">
             <div class="col-md-8 col-sm-12 border-bottom ">
+                {% if post.shared_user %}
+                <div>
+                    <a href="{% url 'profile' post.shared_user.profile.pk %}">
+                    <img class = "rounded-circle post-img" src="{{post.shared_user.profile.picture.url}}" alt="Image">
+                    </a>
+                    <p class="post-text">
+                        <a class="text-primary link-color" href="{% url 'profile' post.shared_user.profile.pk %}">
+                        @{{post.shared_user}}</a> shared a post on  {{post.shared_on}}
+                    </p>
+                </div>
+
+                {% else %}
+                
                 <div>
                     <a href="{% url 'profile' post.author.profile.pk %}">
                     <img class = "rounded-circle post-img" src="{{post.author.profile.picture.url}}" alt="Image">
@@ -33,8 +45,34 @@
                     <p class="post-text">
                         <a class="text-primary link-color" href="{% url 'profile' post.author.profile.pk %}">
                         @{{post.author}}</a>  {{post.created_on}}
+                        <span onclick="shareToggle('{{post.pk}}')"><i class="fa-solid fa-share-from-square share-btn"></i></span>
                     </p>
                 </div>
+                {% endif %}
+                <form action="{% url 'share-post' post.pk %}" method="POST" class='d-none' id="{{post.pk}}">
+                    {% csrf_token %}
+                    {{ share_form | crispy }}
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-dark mt-3"> Share Post..</button>
+                    </div>
+                </form>
+
+                {% if post.shared_body %}
+                <div class="position-relative border-bottom mb-3 body">
+                    <p>{{post.shared_body}}</p>
+                    </div>
+
+                 <div class="shared-post">
+                    <a href="{% url 'profile' post.author.profile.pk %}">
+                        <img class = "rounded-circle post-img" src="{{post.author.profile.picture.url}}" alt="Image">
+                        </a>
+                        <p class="post-text">
+                            <a class="text-primary link-color" href="{% url 'profile' post.author.profile.pk %}">
+                            @{{post.author}}</a>  {{post.created_on}}
+                            {% comment %} <span onclick="shareToggle('{{post.pk}}')"><i class="fa-solid fa-share-from-square share-btn"></i></span> {% endcomment %}
+                        </p>
+                </div> 
+                {% endif %}
                     <div class="position-relative">
                         {% if post.image.count > 0 %}
                         <div class="row">
@@ -45,7 +83,10 @@
                             {% endfor %}
                         </div>
                         {% endif %}
-                    <p>{{post.body}}</p>
+
+                    <div class="body">
+                        <p>{{post.body}}</p>
+                    </div>
                <a href="{% url 'post-detail' post.id %}" class="stretched-link"></a>
             </div>
 
@@ -69,6 +110,11 @@
        </div>
         </div>
         {% endfor %}
+        {% else %}
+        <div class='my-5' style='color:grey;'>
+            <h3>Check the Menu Page and Click Explore to view other posts</h3>
+        </div>
+        {% endif %}
     </div>
  {% endblock content %}
 
