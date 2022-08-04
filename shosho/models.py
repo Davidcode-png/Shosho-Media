@@ -11,7 +11,7 @@ class Post(models.Model):
     created_on = models.DateTimeField(default=timezone.now)
     likes = models.ManyToManyField(User,blank=True,related_name='likes')
     dislikes = models.ManyToManyField(User,blank=True,related_name='dislikes')
-    image = models.ImageField(upload_to='uploads/post_pic',blank=True,null=True)
+    image = models.ManyToManyField('Image',blank=True)
 
     def __str__(self) -> str:
         return f'{self.body[:20]}... {self.id}'
@@ -71,6 +71,7 @@ class Notification(models.Model):
     comment = models.ForeignKey('Comment',related_name='+',on_delete=models.CASCADE,blank=True,null=True)
     date = models.DateTimeField(default=timezone.now)
     user_has_seen = models.BooleanField(default=False)
+    thread = models.ForeignKey('ThreadModel',on_delete=models.CASCADE,related_name='+',blank=True,null=True)
 
 class ThreadModel(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='+')
@@ -84,3 +85,6 @@ class Message(models.Model):
     image = models.ImageField(upload_to='uploads/message_pic',blank=True,null=True)
     date = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
+
+class Image(models.Model):
+    image = models.ImageField(upload_to='uploads/post_pic',blank=True,null=True)

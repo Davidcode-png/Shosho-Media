@@ -1,7 +1,7 @@
 from django import forms
 from django.dispatch import receiver
 from pkg_resources import require
-from .models import Post,Comment, ThreadModel
+from .models import Message, Post,Comment, ThreadModel
 
 class PostForm(forms.ModelForm):
     body = forms.CharField(label='',widget=forms.Textarea(attrs={
@@ -9,11 +9,13 @@ class PostForm(forms.ModelForm):
         'placeholder':'Post Something...'
     }))
 
-    image = forms.ImageField(required=False)
+    image = forms.ImageField(required=False,widget=forms.ClearableFileInput(attrs={
+        'multiple':True
+    }))
 
     class Meta:
         model = Post
-        fields = ['body','image']
+        fields = ['body']
     
 
 
@@ -32,5 +34,10 @@ class CommentForm(forms.ModelForm):
 class ThreadForm(forms.Form):
     username = forms.CharField(label='',max_length=100)
 
-class MessageForm(forms.Form):
-    message = forms.CharField(label='',max_length=1000)
+class MessageForm(forms.ModelForm):
+    body = forms.CharField(label='',max_length=1000)
+    image = forms.ImageField(required=False)
+
+    class Meta:
+        model = Message
+        fields = ['body','image']

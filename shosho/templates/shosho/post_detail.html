@@ -26,9 +26,15 @@
                     <a href="{% url 'post-delete' post.id %}" class="grey-color"><i class="fa-solid fa-trash-can"></i></a>
                     {% endif %}
                 </p>
-                    {% if post.image %}
-                        <img src=" {{ post.image.url }} " class="post-image">
-                    {% endif %}
+                {% if post.image.count > 0 %}
+                <div class="row">
+                    {% for img in post.image.all %}
+                        <div class="col-md-6 col-xs-12">
+                            <img src=" {{ img.image.url }} " class="post-image" />
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <p>{{post.body}}</p>
 
                 
