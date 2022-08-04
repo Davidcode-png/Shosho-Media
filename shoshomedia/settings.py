@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'shosho',
     'landing',
     'crispy_forms',
-    #'django.contrib.sites',
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
