@@ -1,0 +1,1 @@
+web: gunicorn shoshomedia.wsgi --log-file -
