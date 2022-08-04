@@ -32,7 +32,7 @@ SECRET_KEY = key
 DEBUG = True
 
 #'192.168.43.73'
-ALLOWED_HOSTS = ['https://shoshomedia.herokuapp.com','127.0.0.1',]
+ALLOWED_HOSTS = ['shoshomedia.herokuapp.com','127.0.0.1',]
 
 
 # Application definition
