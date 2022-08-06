@@ -456,7 +456,7 @@ class Explore(View):
             posts = None
 
             if tag:
-                posts = Post.objects.filter(tags__in=[tag])
+                posts = Post.objects.filter(tags__contains=[tag])
 
             if posts:
                 context ={
