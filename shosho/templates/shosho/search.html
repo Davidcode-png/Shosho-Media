@@ -12,7 +12,9 @@
             <div class="col-md-5 col-sm-12 border-bottom position-relative">
                 <div>
                     <a href="{% url 'profile' profile.pk %}">
+                        {% if profile.picture.url %}
                     <img class = "rounded-circle post-img" src="{{profile.picture.url}}" alt="Image">
+                    {% endif %}
                     </a>
                     <p class="post-text">
                         <a class="text-primary link-color" href="{% url 'profile' profile.pk %}">
