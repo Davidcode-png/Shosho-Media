@@ -45,9 +45,9 @@
             
             <div>
                 <a href="{% url 'profile' post.author.profile.pk %}">
-                {% comment %} {% if post.author.profile.picture.url %} {% endcomment %}
+                 {% if post.author.profile.picture.url %}
                 <img class = "rounded-circle post-img" src="{{post.author.profile.picture.url}}" alt="Image">
-                {% comment %} {% endif %} {% endcomment %}
+                 {% endif %}
                 </a>
                 <p class="post-text">
                     <a class="text-primary link-color" href="{% url 'profile' post.author.profile.pk %}">
